@@ -2,27 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Doctor;
+use App\Models\Feedback;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 
-class DoctorController extends Controller
+class FeedbacksController extends Controller
 {
+
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         //
-        return "All doctors info";
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -35,15 +30,7 @@ class DoctorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Doctor $doctor)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Doctor $doctor)
+    public function show(Feedback $feedback)
     {
         //
     }
@@ -51,7 +38,7 @@ class DoctorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Doctor $doctor)
+    public function update(Request $request, Feedback $feedback)
     {
         //
     }
@@ -59,7 +46,7 @@ class DoctorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Doctor $doctor)
+    public function destroy(Feedback $feedback)
     {
         //
     }
