@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('appointments', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('patient_id');
-            $table->unsignedBigInteger('doctor_id');
+            $table->uuid('id')->primary();
+            $table->uuid('patient_id');
+            $table->uuid('doctor_id');
             $table->string('app_time');
             $table->string('app_date');
             $table->string('purpose');
