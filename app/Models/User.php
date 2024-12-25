@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Appointment;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
+    
 
+    use HasUuids;
     /**
      * The attributes that are mass assignable.
      *
@@ -25,7 +28,6 @@ class User extends Authenticatable
         'last_name',
         'phoneno',
         'photo_url',
-        'gender',
         'email',
         'gender',
         'marital_status',
@@ -52,7 +54,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // model realtionships
+    // model relationships
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
