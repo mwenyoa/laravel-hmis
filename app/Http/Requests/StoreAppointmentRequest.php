@@ -25,7 +25,7 @@ class StoreAppointmentRequest extends FormRequest
             //
             'app_time' => ['required', 'string'],
             'app_date' => ['required', 'string', 'max:256'],
-            'purpose'=> ['required', 'string',''],
+            'purpose'=> ['required', 'string'],
         ];
     }
 }
