@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\DoctorsController;
 use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\FeedbacksController;
@@ -46,17 +47,18 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 // Public Routes
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register']);
 
 // Protected Routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
 
-    Route::resources([
+    Route::apiResources([
         "/doctors" => DoctorsController::class,
         "/patients" => PatientsController::class,
         "/appointments" => AppointmentsController::class,
-        "/feedbacks" => FeedbacksController::class
-    ], ['only' => ['index', 'show', 'store', 'update', 'destroy']]);
+        "/feedbacks" => FeedbacksController::class,
+        "/users" => UsersController::class
+    ]);
 });

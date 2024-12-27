@@ -69,4 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Patient::class);
     }
+
+    // date format
+    
 }
