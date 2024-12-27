@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\HttpResponses;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Resources\UsersResourse;
+use App\Traits\HttpResponses;
+use App\Http\Resources\UsersResource;
 
 
 class UsersController extends Controller
@@ -16,7 +17,7 @@ class UsersController extends Controller
      */
     public function index()
     {
-        //
+        return UsersResource::collection(User::orderBy("created_at", "desc")->paginate(10));
     }
 
 

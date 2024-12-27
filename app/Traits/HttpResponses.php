@@ -11,7 +11,7 @@ trait HttpResponses{
         ], $code);
     }
 
-    protected function error($data,  $message = null, $code){
+    protected function error($data,  $message, $code){
         return response()->json([
             "status" => "Fail",
             "message" => $message,

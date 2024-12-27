@@ -1,13 +1,15 @@
 <?php
 
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\FeedbackController;
-use App\Http\Controllers\PatientController;
-use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\DoctorsController;
+use App\Http\Controllers\PatientsController;
+use App\Http\Controllers\FeedbacksController;
+use App\Http\Controllers\AppointmentsController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
 
 
 
@@ -26,15 +28,37 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Email verification Routes
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect('/');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 // Public Routes
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register']);
 
 // Protected Routes
-Route::group(['middleware' => ['auth:sanctum']], function(){
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
-    Route::resource("/doctors", DoctorController::class);
-    Route::resource("/patients", PatientController::class);
-    Route::resource("/appointments", AppointmentController::class);
-    Route::resource("/feedbacks",   FeedbackController::class);
+
+    Route::apiResources([
+        "/doctors" => DoctorsController::class,
+        "/patients" => PatientsController::class,
+        "/appointments" => AppointmentsController::class,
+        "/feedbacks" => FeedbacksController::class,
+        "/users" => UsersController::class
+    ]);
 });
