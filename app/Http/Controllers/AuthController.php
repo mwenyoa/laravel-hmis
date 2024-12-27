@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\UsersResource;
 use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserLoginRequest;
@@ -23,7 +24,7 @@ class AuthController extends Controller
         if (!Auth::attempt($request->only(['email', 'password']))) {
             return $this->error('', 'Invalid login credentials', 401);
         }
-        $user = User::where('email', $request->email)->first();
+        $user = UsersResource::make(User::where('email', $request->email)->first());
 
         return $this->success([
             'user' => $user,
