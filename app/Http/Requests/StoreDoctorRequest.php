@@ -24,7 +24,7 @@ class StoreDoctorRequest extends FormRequest
         return [
             'specialization' => ['required', 'string', 'max:30', 'min:3'],
             'hpcno' => ['required', 'string', 'max:30', 'min:3'],
-            'consultancy_fee' => ['required', 'float', 'max:30', 'min:3'],
+            'consultancy_fee' => ['required',  'max:30', 'min:3'],
         ];
     }
 }
