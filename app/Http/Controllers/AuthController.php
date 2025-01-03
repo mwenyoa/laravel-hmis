@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Traits\HttpResponses;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Resources\UsersResource;
-use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserLoginRequest;
+use App\Http\Resources\UsersResource;
+use App\Models\User;
+use App\Traits\HttpResponses;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     use HttpResponses;
 
-    // Login User 
+    // Login User
     public function login(UserLoginRequest $request)
     {
         $request->validated($request->all());
@@ -28,7 +26,7 @@ class AuthController extends Controller
 
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('Api Token of ' . $user->name)->plainTextToken
+            'token' => $user->createToken('Api Token of ' . $user->name)->plainTextToken,
         ], 'Logged In Successfully');
     }
 
@@ -46,15 +44,14 @@ class AuthController extends Controller
             'email' => $request->email,
             'gender' => $request->gender,
             'marital_status' => $request->marital_status,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
         ]);
         event(new Registered($user));
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('API token of ' . $user->name)->plainTextToken
+            'token' => $user->createToken('API token of ' . $user->name)->plainTextToken,
         ], 'User registered successfully', 201);
     }
-
 
     protected function logout()
     {

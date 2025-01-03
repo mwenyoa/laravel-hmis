@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('doctors', function (Blueprint $table) {
             $table->uuid('id')->primary(); // Use UUID for the primary key
-            $table->uuid('user_id'); 
+            $table->uuid('user_id');
             $table->string('specialization');
             $table->integer('hpcno');
             $table->decimal('consultancy_fee', 5,2);
