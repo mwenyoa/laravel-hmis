@@ -14,7 +14,8 @@ class Doctor extends Model
     protected $fillable = [
         "specialization",
         "hpcno",
-        "consultancy_fee"
+        "consultancy_fee",
+        "user_id"
     ];
 
     // relationship
