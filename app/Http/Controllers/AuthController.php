@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UserLoginRequest;
-use App\Http\Resources\UsersResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\UsersResource;
+use Illuminate\Auth\Events\Registered;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UserLoginRequest;
 
 class AuthController extends Controller
 {
@@ -18,16 +18,19 @@ class AuthController extends Controller
     // Login User
     public function login(UserLoginRequest $request)
     {
-        $request->validated($request->all());
+
+        $validatedData = $request->validated();
         if (!Auth::attempt($request->only(['email', 'password']))) {
             return $this->error('', 'Invalid login credentials', 401);
         }
-        $user = UsersResource::make(User::where('email', $request->email)->first());
+        $user = Auth::user();
+        $token = $user->createToken('Api Token of ' . $user->name)->plainTextToken;
+        $userResource = UsersResource::make($user);
 
         return $this->success([
-            'user' => $user,
-            'token' => $user->createToken('Api Token of ' . $user->name)->plainTextToken,
-        ], 'Logged In Successfully');
+            'user' => $userResource,
+            'token' => $token,
+        ], 'Logged In Successfully', 200);
     }
 
     // Register New User
