@@ -18,28 +18,19 @@ class AuthController extends Controller
     // Login User
     public function login(UserLoginRequest $request)
     {
-        // Validate the request data
-        $validatedData = $request->validated();
 
-        // Attempt to authenticate the user
+        $validatedData = $request->validated();
         if (!Auth::attempt($request->only(['email', 'password']))) {
             return $this->error('', 'Invalid login credentials', 401);
         }
-
-        // Fetch the authenticated user
         $user = Auth::user();
-
-        // Generate a Sanctum token for the user
         $token = $user->createToken('Api Token of ' . $user->name)->plainTextToken;
-
-        // Format the user data with the resource
         $userResource = UsersResource::make($user);
-
 
         return $this->success([
             'user' => $userResource,
             'token' => $token,
-        ], 'Logged In Successfully');
+        ], 'Logged In Successfully', 200);
     }
 
     // Register New User
