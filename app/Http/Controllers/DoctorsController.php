@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDoctorRequest;
-use App\Models\Doctor;
-use App\Traits\HttpResponses;
+use Log;
 use Exception;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
+use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreDoctorRequest;
 
 class DoctorsController extends Controller
 {
@@ -26,22 +27,28 @@ class DoctorsController extends Controller
     public function store(StoreDoctorRequest $request)
     {
 
+     $user = Auth::user();
+
         try {
-            $request->validated($request->all());
-
-            $doctor = Doctor::create([
-                "user_id" => auth()->user()->id,
-                "specialization" => $request->specialization,
-                "hpcno" => $request->hpcno,
-                "consultancy_fee" => $request->consultancy_fee,
-            ]);
-
-            return $this->success([
-                "doctor" => $doctor,
-            ], "Doctor created successfully", 201);
+            if($user){
+                $request->validated($request->all());
+                $doctor = Doctor::create([
+                    "user_id" => $user->id,
+                    "specialization" => $request->specialization,
+                    "hpcno" => $request->hpcno,
+                    "consultancy_fee" => $request->consultancy_fee,
+                ]);
+    
+                return $this->success([
+                    "doctor" => $doctor,
+                ], "Doctor created successfully", 201);
+            }else{
+                return $this->error(null, "User not found", 404);
+            }
+           
         } catch (Exception $e) {
             $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, 401);
+            return $this->error(null, $error_msg, 422);
         }
     }
 
