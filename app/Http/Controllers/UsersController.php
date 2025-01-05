@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UsersResource;
+use Exception;
 use App\Models\User;
 use App\Traits\HttpResponses;
-use Exception;
+use App\Http\Resources\UsersResource;
+use App\Http\Requests\UpdateUserRequest;
 
 class UsersController extends Controller
 {
@@ -88,6 +88,22 @@ class UsersController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            if (!auth()->check()) {
+                return $this->error(null, "You must be logged in to continue", 401);
+            }
+
+            $user = User::findOrFail($id);
+
+            if (auth()->id() !== $user->id) {
+                return $this->error(null, "You're not permitted to delete this user's record", 403);
+            }
+
+            $user->delete();
+
+            return $this->success(null, null, 204);
+        } catch (Exception $e) {
+            return $this->error(null, $e->getMessage(), $e->getCode() ?: 500);
+        }
     }
 }
