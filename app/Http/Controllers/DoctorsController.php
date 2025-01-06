@@ -9,10 +9,11 @@ use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DoctorsResource;
 use App\Http\Requests\StoreDoctorRequest;
+use App\Traits\HandlesAuthorization;
 
 class DoctorsController extends Controller
 {
-    use HttpResponses;
+    use HttpResponses, HandlesAuthorization;
     /**
      * Display a listing of the resource.
      */
@@ -20,10 +21,7 @@ class DoctorsController extends Controller
     {
 
         try {
-            if (!Auth::check()) {
-                return $this->error(null, "You not logged in to view doctors", 401);
-            }
-
+            $this->ensureAuthenticated();
             $doctors = DoctorsResource::collection(Doctor::orderBy("created_at", "desc")->paginate(10));
             return $this->success($doctors, "List of doctors", 200);
         } catch (Exception $e) {
@@ -37,9 +35,7 @@ class DoctorsController extends Controller
     public function store(StoreDoctorRequest $request)
     {
         try {
-            if (!auth()->user()) {
-                return $this->error(null, "You are not logged in to create a doctor", 401);
-            }
+            $this->ensureAuthenticated();
             $request->validated($request->all());
             $user = Auth::user();
             $doctor = Doctor::create([
@@ -62,10 +58,7 @@ class DoctorsController extends Controller
     public function show(Doctor $doctor)
     {
         try {
-
-            if (!auth()->check()) {
-                return $this->error(null, "Please login to view this doctor", 401);
-            }
+            $this->ensureAuthenticated();
             $doctor = DoctorsResource::make($doctor);
             return $this->success($doctor, "Doctor's Information", 200);
         } catch (Exception $e) {
@@ -77,13 +70,9 @@ class DoctorsController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            if (!auth()->check()) {
-                return $this->error(null, "You must be logged in to update doctors information", 401);
-            }
+            $this->ensureAuthenticated();
             $doctor = Doctor::findOrFail($id);
-            if (auth()->id() !== $doctor->user_id) {
-                return $this->error(null, "You're not permitted to update this doctor's information", 403);
-            }
+            $this->ensureOwnership($doctor);
             $doctor->update($request->all());
             $formated_data = DoctorsResource::make($doctor);
             return $this->success($formated_data, "Doctor updated successfully", 200);
@@ -99,14 +88,9 @@ class DoctorsController extends Controller
     public function destroy(string $id)
     {
         try {
-            if (!auth()->check()) {
-                return $this->error(null, "You must be logged in to continue", 401);
-            }
-
+            $this->ensureAuthenticated();
             $doctor = Doctor::findOrFail($id);
-            if (auth()->id() !== $doctor->user->id) {
-                return $this->error(null, "You're not permitted to delete this doctor's record", 403);
-            }
+            $this->ensureOwnership($doctor);
             $doctor->delete();
             return $this->success(null, "Doctor's record successfully deleted", 204);
         } catch (Exception $e) {
