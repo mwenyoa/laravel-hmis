@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
@@ -53,7 +53,6 @@ Route::post('/register', [AuthController::class, 'register']);
 // Protected Routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
-
     Route::apiResources([
         "/doctors" => DoctorsController::class,
         "/patients" => PatientsController::class,

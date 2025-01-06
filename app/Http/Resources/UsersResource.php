@@ -23,6 +23,7 @@ class UsersResource extends JsonResource
                 "phoneno" => $this->phoneno,
                 "photo_url" => $this->photo_url,
                 "gender" => $this->gender,
+                "age" => $this->age,
                 "created_at" => $this->created_at,
                 "marital_status" => $this->marital_status,
             ],
