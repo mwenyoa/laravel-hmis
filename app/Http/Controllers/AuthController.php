@@ -23,9 +23,18 @@ class AuthController extends Controller
         if (!Auth::attempt($request->only(['email', 'password']))) {
             return $this->error('', 'Invalid login credentials', 401);
         }
+        if(auth()->id() === Auth::user()){}
         $user = Auth::user();
         $token = $user->createToken('Api Token of ' . $user->name)->plainTextToken;
         $userResource = UsersResource::make($user);
+        // check if user is already logged in
+        if (auth()->check()) {
+            return redirect()->route(ENV('APP_FRONTEND_URL'))->with([
+                'user' => $userResource,
+                'token' => $token,
+                'message' => 'You are already logged in'
+            ]);
+        }
 
         return $this->success([
             'user' => $userResource,
@@ -46,6 +55,7 @@ class AuthController extends Controller
             'photo_url' => $request->photo_url,
             'email' => $request->email,
             'gender' => $request->gender,
+            'age' => $request->age,
             'marital_status' => $request->marital_status,
             'password' => Hash::make($request->password),
         ]);
