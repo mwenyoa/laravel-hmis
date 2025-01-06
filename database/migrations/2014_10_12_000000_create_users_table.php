@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phoneno')->nullable();
             $table->string('gender');
+            $table->integer('age');
             $table->string('marital_status');
             $table->string('photo_url')->nullable();
             $table->string('role')->nullable();
