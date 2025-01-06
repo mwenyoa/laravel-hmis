@@ -14,23 +14,26 @@ class DoctorsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-      return  [
-        "id" => $this->id,
-        "attributes" =>[
-            ["dotor" => [
-                "data" =>[
-                    "specialization" => $this->specialization,
-                    "consultancy_fee" => $this->consultancy_fee,
-                    "hpcno" => $this->hpcno,
-                    "user_id" => $this->user_id
-                ],
-             ]]
+        return  [
+            "id" => $this->id,
+            "attributes" => [
+                "dotor" => [
+                    "data" => [
+                        "specialization" => $this->specialization,
+                        "consultancy_fee" => $this->consultancy_fee,
+                        "hpcno" => $this->hpcno,
+                        "user_id" => $this->user_id
+                    ],
+                ]
             ],
-            "relationship" =>[
-             "user_id" => $this->user_id,
-             "firstanme" =>$this->user->first_name,
-             "lastname"=>$this->user->last_name,
-             "email"=>$this->user->email,
+            "relationship" => [
+                "user" => [
+                    "user_id" => $this->user_id,
+                    "firstanme" => $this->user->first_name,
+                    "lastname" => $this->user->last_name,
+                    "age" => $this->user->age,
+                    "email" => $this->user->email,
+                ]
             ]
         ];
     }
