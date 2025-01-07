@@ -15,6 +15,7 @@ trait HandlesAuthorization
 
     protected function ensureOwnership($resource)
     {
+        dd($resource->user_id);
         if (Auth::id() !== $resource->user_id) {
             abort(403, 'You are not authorized to access this resource.');
         }
