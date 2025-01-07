@@ -5,17 +5,14 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\User;
 use App\Traits\HttpResponses;
+use App\Traits\HandlesAuthorization;
 use App\Http\Resources\UsersResource;
 use App\Http\Requests\UpdateUserRequest;
-use App\Traits\HandlesAuthorization;
 
 class UsersController extends Controller
 {
 
     use HttpResponses, HandlesAuthorization;
-    /**
-     * Display a listing of the resource.
-     */
     /**
      * Display a listing of the resource.
      */
@@ -66,7 +63,6 @@ class UsersController extends Controller
     }
 
     /**
-
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
