@@ -17,7 +17,7 @@ class DoctorsResource extends JsonResource
         return  [
             "id" => $this->id,
             "attributes" => [
-                "dotor" => [
+                "doctor" => [
                     "data" => [
                         "specialization" => $this->specialization,
                         "consultancy_fee" => $this->consultancy_fee,
