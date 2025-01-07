@@ -28,13 +28,13 @@ class AuthController extends Controller
         $token = $user->createToken('Api Token of ' . $user->name)->plainTextToken;
         $userResource = UsersResource::make($user);
         // check if user is already logged in
-        if (auth()->check()) {
-            return redirect()->route(ENV('APP_FRONTEND_URL'))->with([
-                'user' => $userResource,
-                'token' => $token,
-                'message' => 'You are already logged in'
-            ]);
-        }
+        // if (auth()->check()) {
+        //     return redirect()->route(ENV('APP_FRONTEND_URL'))->with([
+        //         'user' => $userResource,
+        //         'token' => $token,
+        //         'message' => 'You are already logged in'
+        //     ]);
+        // }
 
         return $this->success([
             'user' => $userResource,
