@@ -27,7 +27,6 @@ class UsersResource extends JsonResource
                 "created_at" => $this->created_at,
                 "marital_status" => $this->marital_status,
             ],
-    
         ];
     }
 }

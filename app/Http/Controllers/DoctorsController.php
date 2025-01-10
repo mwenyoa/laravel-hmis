@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Doctor;
+use App\Traits\DebugError;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use App\Traits\CustomErrorMessage;
+use App\Traits\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\DoctorsResource;
 use App\Http\Requests\StoreDoctorRequest;
-use App\Traits\HandlesAuthorization;
 
 class DoctorsController extends Controller
 {
-    use HttpResponses, HandlesAuthorization;
+    use HttpResponses, HandlesAuthorization, DebugError, CustomErrorMessage;
     /**
      * Display a listing of the resource.
      */
@@ -25,7 +27,9 @@ class DoctorsController extends Controller
             $doctors = DoctorsResource::collection(Doctor::orderBy("created_at", "desc")->paginate(10));
             return $this->success($doctors, "List of doctors", 200);
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), $e->getCode() ?: 404);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 404);
         }
     }
 
@@ -44,11 +48,12 @@ class DoctorsController extends Controller
                 "hpcno" => $request->hpcno,
                 "consultancy_fee" => $request->consultancy_fee,
             ]);
-
-            return $this->success($doctor, "Doctor created successfully", 201);
+            $doctorResource = new DoctorsResource($doctor);
+            return $this->success($doctorResource, "Doctor created successfully", 201);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, 422);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, 422);
         }
     }
 
@@ -62,8 +67,9 @@ class DoctorsController extends Controller
             $doctor = DoctorsResource::make($doctor);
             return $this->success($doctor, "Doctor's Information", 200);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, 404);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, 404);
         }
     }
 
@@ -74,28 +80,28 @@ class DoctorsController extends Controller
             $doctor = Doctor::findOrFail($id);
             $this->ensureOwnership($doctor);
             $doctor->update($request->all());
-            $formated_data = DoctorsResource::make($doctor);
-            return $this->success($formated_data, "Doctor updated successfully", 200);
+            $formatted_data = DoctorsResource::make($doctor);
+            return $this->success($formatted_data, "Doctor updated successfully", 200);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, $e->getCode() ?: 500);
+            $this->debugAppError($e);
+            return $this->error(null, $e->getMessage(), $e->getCode() ?: 422);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Doctor $doctor)
     {
         try {
             $this->ensureAuthenticated();
-            $doctor = Doctor::findOrFail($id);
             $this->ensureOwnership($doctor);
             $doctor->delete();
-            return $this->success(null, "Doctor's record successfully deleted", 204);
+            return $this->success(null, null, 204);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, $e->getCode() ?: 500);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();
+            return $this->error(null, $err_msg, $e->getCode() ?: 500);
         }
     }
 }

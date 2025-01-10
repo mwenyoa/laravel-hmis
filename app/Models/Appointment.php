@@ -14,8 +14,9 @@ class Appointment extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        "app_time",
-        "app_date",
+        "patient_id",
+        "appointment_date",
+        "appointment_time",
         "purpose"
     ];
 

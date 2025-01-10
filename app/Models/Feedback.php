@@ -11,7 +11,8 @@ class Feedback extends Model
 {
     use HasFactory, HasUuids;
     protected $fillable = [
-        "message"
+        "message",
+        "patient_id"
     ];
 
 
