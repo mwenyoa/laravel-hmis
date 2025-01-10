@@ -5,17 +5,20 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Patient;
 use App\Models\Feedback;
+use App\Traits\DebugError;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use App\Traits\CustomErrorMessage;
 use App\Traits\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\FeedbackResource;
 use App\Http\Resources\FeedbacksResource;
-use App\Http\Requests\StoreFeedbackRequest; // Singular name for resource
+use App\Http\Requests\StoreFeedbackRequest;
+
+// Singular name for resource
 
 class FeedbacksController extends Controller
 {
-    use HttpResponses, HandlesAuthorization;
+    use HttpResponses, HandlesAuthorization, DebugError, CustomErrorMessage;
 
     /**
      * Display a listing of the resource.
@@ -24,11 +27,11 @@ class FeedbacksController extends Controller
     {
         try {
             $this->ensureAuthenticated();
-            $feedbacks = Feedback::orderBy("created_at", "desc")->paginate(10); // Fetch feedbacks directly
-            $feedbackResources = FeedbacksResource::collection($feedbacks); // Use collection for multiple items
+            $feedbackResources = FeedbacksResource::collection(Feedback::orderBy("created_at", "desc")->paginate(10));
             return $this->success($feedbackResources, "Patient's feedback", 200);
         } catch (Exception $e) {
-            $err_msg = $e->getMessage();
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
             return $this->error(null, $err_msg, 422); // Ensure return statement
         }
     }
@@ -41,19 +44,20 @@ class FeedbacksController extends Controller
         try {
             $this->ensureAuthenticated();
             $request->validated();
-
-            $auth_user = Auth::user(); 
+            $auth_user = Auth::user();
+            $patient = $auth_user->patients->first();
             // dd($auth_user->patients);
-            $this->ensureOwnership($auth_user->patients);
+            $this->ensureOwnership($patient);
             $feedback = Feedback::create([
-                "patient_id" => $auth_user->patients->id, // Use patient's actual ID
+                "patient_id" => $patient->id, // Use patient's actual ID
                 "message" => $request->message,
             ]);
-
-            return $this->success($feedback, "Patient feedback saved successfully", 201);
+            $feedbackResource = new FeedbacksResource($feedback);
+            return $this->success($feedbackResource, "Patient feedback saved successfully", 201);
         } catch (Exception $e) {
-            $err_msg = $e->getMessage();
-            return $this->error(null, $e->getMessage(), 422);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, 422);
         }
     }
 
@@ -69,7 +73,8 @@ class FeedbacksController extends Controller
             $feedbackResource = FeedbacksResource::make($feedback);
             return $this->success($feedbackResource, "Feedback retrieved successfully", 200);
         } catch (Exception $e) {
-            $err_msg = $e->getMessage();
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
             return $this->error(null, $err_msg, 422);
         }
     }
@@ -81,12 +86,13 @@ class FeedbacksController extends Controller
     {
         try {
             $this->ensureAuthenticated();
-            $this->ensureOwnership($feedback->patient); // Verify ownership
-
-            $feedback->update($request->only('message')); // Update only specific fields
-            return $this->success($feedback, "Feedback updated successfully", 200);
+            // Verify ownership
+            $this->ensureOwnership($feedback->patient);
+            $feedbackResource = new FeedbacksResource($feedback->update($request->only('message')));
+            return $this->success($feedbackResource, "Feedback updated successfully", 200);
         } catch (Exception $e) {
-            $err_msg = $e->getMessage();
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
             return $this->error(null, $err_msg, 422);
         }
     }
@@ -98,12 +104,13 @@ class FeedbacksController extends Controller
     {
         try {
             $this->ensureAuthenticated();
-            $this->ensureOwnership($feedback->patient); // Verify ownership
-
+            // Verify ownership
+            $this->ensureOwnership($feedback->patient);
             $feedback->delete();
             return $this->success(null, "Feedback deleted successfully", 200);
         } catch (Exception $e) {
-            $err_msg = $e->getMessage();
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
             return $this->error(null, $err_msg, 422);
         }
     }

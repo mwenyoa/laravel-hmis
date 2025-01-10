@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use App\Traits\DebugError;
 use App\Traits\HttpResponses;
+use App\Traits\CustomErrorMessage;
 use App\Traits\HandlesAuthorization;
 use App\Http\Resources\UsersResource;
 use App\Http\Requests\UpdateUserRequest;
@@ -12,7 +14,7 @@ use App\Http\Requests\UpdateUserRequest;
 class UsersController extends Controller
 {
 
-    use HttpResponses, HandlesAuthorization;
+    use HttpResponses, HandlesAuthorization, DebugError, CustomErrorMessage;
     /**
      * Display a listing of the resource.
      */
@@ -22,10 +24,13 @@ class UsersController extends Controller
             // Check if the user is authenticated
             $this->ensureAuthenticated();
             // Fetch users and return them using the resource
-            $users = UsersResource::collection(User::orderBy("created_at", "desc")->paginate(10));
-            return $this->success($users, "Users Information", 200);
+            $users = User::orderBy("created_at", "desc")->paginate(10); 
+            $usersResource = UsersResource::collection($users);
+            return $this->success($usersResource, "Users Information", 200);
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), 404);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, 404);
         }
     }
 
@@ -40,7 +45,9 @@ class UsersController extends Controller
             $user_data = UsersResource::make($user);
             return $this->success($user_data, "$user->first_name $user->last_name Information");
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), $e->getCode());
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 422);
         }
     }
 
@@ -58,23 +65,26 @@ class UsersController extends Controller
             $formattedData = UsersResource::make($user);
             return $this->success($formattedData, "User data updated successfully", 200);
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), $e->getCode() ?: 500);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 500);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
         try {
             $this->ensureAuthenticated();
-            $user = User::findOrFail($id);
             $this->ensureOwnership($user);
             $user->delete();
             return $this->success(null, null, 204);
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), $e->getCode() ?: 500);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 500);
         }
     }
 }

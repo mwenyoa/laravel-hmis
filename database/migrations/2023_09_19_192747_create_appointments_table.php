@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('patient_id');
             $table->uuid('doctor_id');
-            $table->string('app_time');
-            $table->string('app_date');
+            $table->string('appointment_time');
+            $table->string('appointment_date');
             $table->string('purpose');
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
             $table->foreign('doctor_id')->references('id')->on('doctors')->onDelete('cascade');

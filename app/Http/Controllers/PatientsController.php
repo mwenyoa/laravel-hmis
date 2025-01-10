@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Patient;
+use App\Traits\DebugError;
 use App\Traits\HttpResponses;
+use App\Traits\CustomErrorMessage;
+use App\Traits\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\PatientsResource;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
-use App\Traits\HandlesAuthorization;
 
 class PatientsController extends Controller
 {
-    use HttpResponses, HandlesAuthorization;
+    use HttpResponses, HandlesAuthorization, DebugError, CustomErrorMessage;
     /* Display a listing of the resource.
      */
     public function index()
@@ -23,7 +25,9 @@ class PatientsController extends Controller
             $patients = PatientsResource::collection(Patient::orderBy("created_at", "desc")->paginate(10));
             return $this->success($patients, "List of patients", 200);
         } catch (Exception $e) {
-            return $this->error(null, $e->getMessage(), $e->getCode() ?: 404);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 404);
         }
     }
 
@@ -45,8 +49,9 @@ class PatientsController extends Controller
             $formatedPatients = PatientsResource::make($patient);
             return $this->success($formatedPatients, "patient record created successfully", 200);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, 422);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, 422);
         }
     }
 
@@ -61,42 +66,49 @@ class PatientsController extends Controller
             $patient_data = PatientsResource::make($patient);
             return $this->success($patient_data, "Patient Information", 200);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, $e->getCode() ?: 422);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 422);
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePatientRequest $request, string $id)
+    public function update(UpdatePatientRequest $request, Patient $patient)
     {
         try {
             $this->ensureAuthenticated();
-            $patient = Patient::findOrFail($id);
             $this->ensureOwnership($patient);
-            $formated_data = PatientsResource::make($patient->update($request->all()));
-            return $this->success($formated_data, "Patient updated successfully", 200);
+            $request->validated();
+            $formatted_data = PatientsResource::make($patient->update($request->all()));
+            return $this->success($formatted_data, "Patient updated successfully", 200);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, 422);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 422);
         }
     }
 
     /**
      * Remove the specified resource from storage.
+     *//**
+     * Remove the specified patient from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Patient $patient)
     {
         try {
             $this->ensureAuthenticated();
-            $patient = Patient::findOrFail($id);
+            // Ensure the authenticated user owns the patient resource
             $this->ensureOwnership($patient);
+            // Delete the patient record
             $patient->delete();
             return $this->success(null, null, 204);
         } catch (Exception $e) {
-            $error_msg = $e->getMessage();
-            return $this->error(null, $error_msg, $e->getCode() ?: 500);
+            $this->debugAppError($e);
+            $err_msg = $e->getMessage();;
+            return $this->error(null, $err_msg, $e->getCode() ?: 422);
         }
     }
+
 }
