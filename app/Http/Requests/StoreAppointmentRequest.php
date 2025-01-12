@@ -23,7 +23,7 @@ class StoreAppointmentRequest extends FormRequest
     {
         return [
             'patient_id' => ['required', 'string'],
-            'appointment_time' => ['required', 'string'],
+            'appointment_time' => ['required', 'string', 'unique:appointments'],
             'appointment_date' => ['required', 'string', 'max:256'],
             'purpose' => ['required', 'string'],
         ];
