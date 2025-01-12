@@ -24,7 +24,7 @@ class StoreUserRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'max:30', 'min:3'],
             'last_name' => ['required', 'string', 'max:30', 'min:3'],
-            'phoneno' => ['required', 'string', 'max:30', 'min:3'],
+            'phoneno' => ['required', 'string', 'max:30', 'min:3','unique:users'],
             'gender' => ['required', 'string', 'max:30', 'min:3'],
             'age' => ['required', 'integer', 'min:0'],
             'marital_status' => ['required', 'string', 'max:30', 'min:3'],
