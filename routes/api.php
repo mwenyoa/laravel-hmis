@@ -10,9 +10,6 @@ use App\Http\Controllers\FeedbacksController;
 use App\Http\Controllers\AppointmentsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
-
-
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,7 +19,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "api" middleware group. Make something great!
 |
-*/
+ */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -38,7 +35,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     return redirect('/');
 })->middleware(['auth', 'signed'])->name('verification.verify');
-
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
@@ -58,6 +54,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         "/patients" => PatientsController::class,
         "/appointments" => AppointmentsController::class,
         "/feedbacks" => FeedbacksController::class,
-        "/users" => UsersController::class
+        "/users" => UsersController::class,
     ]);
 });
