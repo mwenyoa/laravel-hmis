@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +31,9 @@ class AppServiceProvider extends ServiceProvider
         // Permission::create(['name' => 'manage_users']);
         // Permission::create(['name' => 'manage_patients']);
         // Permission::create(['name' => 'manage_doctors']);
+
+         VerifyEmail::toMailUsing(function ($notifiable, $url) {
+        return (new QueuedVerifyEmailNotification)->toMail($notifiable);
+    });
     }
 }

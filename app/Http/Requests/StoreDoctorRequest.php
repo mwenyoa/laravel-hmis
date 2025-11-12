@@ -22,9 +22,11 @@ class StoreDoctorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'specialization' => ['required', 'string', 'max:30', 'min:3'],
-            'hpcno' => ['required', 'unique:doctors', 'string', 'max:30', 'min:3'],
-            'consultancy_fee' => ['required',  'max:30', 'min:3'],
+            'hpcno' => ['required', 'unique:doctors', 'string', 'max:10', 'min:4'],
+            'consultancy_fee' => ['required', 'integer'],
+            'user_id' => ['required', 'string', 'unique:doctors'],
+            'experience' => ['required', 'integer'],
+            'availability' => ['required', 'string'],
         ];
     }
 }

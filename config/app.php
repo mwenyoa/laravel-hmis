@@ -59,6 +59,19 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+
+     /*
+    |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used to generate links in emails that point to your React
+    | frontend application. This should be set to your React app's URL.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

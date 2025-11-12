@@ -2,22 +2,24 @@
 
 namespace App\Models;
 
+use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
-use App\Models\Appointment;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
+use App\Notifications\QueuedVerifyEmailNotification;
+use App\Notifications\VerificationEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
-    
-
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
     use HasUuids;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -61,9 +63,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Appointment::class);
     }
 
-    public function doctors()
+    public function doctor()
     {
-        return $this->hasMany(Doctor::class);
+        return $this->hasOne(Doctor::class);
     }
 
     public function patients()
@@ -71,6 +73,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Patient::class);
     }
 
-    // date format
-    
+    // email queueing
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new QueuedVerifyEmailNotification);
+    }
 }

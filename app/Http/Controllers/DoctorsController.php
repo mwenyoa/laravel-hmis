@@ -2,34 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\Doctor;
-use App\Traits\DebugError;
-use Illuminate\Http\Request;
-use App\Traits\HttpResponses;
-use App\Traits\CustomErrorMessage;
-use App\Traits\HandlesAuthorization;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\DoctorsResource;
 use App\Http\Requests\StoreDoctorRequest;
+use App\Http\Resources\DoctorsResource;
+use App\Models\Doctor;
+use App\Traits\CustomErrorMessage;
+use App\Traits\DebugError;
+use App\Traits\HandlesAuthorization;
+use App\Traits\HttpResponses;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Request;
 
 class DoctorsController extends Controller
 {
-    use HttpResponses, HandlesAuthorization, DebugError, CustomErrorMessage;
+    use CustomErrorMessage, DebugError, HandlesAuthorization, HttpResponses;
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-
         try {
             $this->ensureAuthenticated();
-            $doctors = DoctorsResource::collection(Doctor::orderBy("created_at", "desc")->paginate(10));
-            return $this->success($doctors, "List of doctors", 200);
+
+            // Eager load relationships and paginate
+            $doctors = Doctor::with(['user', 'specialties'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+            // Transform using DoctorsResource
+            $doctorsResource = DoctorsResource::collection($doctors);
+
+            return $this->success($doctorsResource, 'List of doctors');
+        } catch (HttpResponseException $e) {
+            // Re-throw authorization exceptions to let Laravel handle them
+            throw $e;
         } catch (Exception $e) {
             $this->debugAppError($e);
-            $err_msg = $e->getMessage();;
-            return $this->error(null, $err_msg, $e->getCode() ?: 404);
+
+            return $this->error($e->getMessage(), 500);
         }
     }
 
@@ -40,36 +52,51 @@ class DoctorsController extends Controller
     {
         try {
             $this->ensureAuthenticated();
-            $request->validated($request->all());
-            $user = Auth::user();
+
+            // Fix: Remove the parameter from validated() method
+            $request->validated();
+
             $doctor = Doctor::create([
-                "user_id" => $user->id,
-                "specialization" => $request->specialization,
-                "hpcno" => $request->hpcno,
-                "consultancy_fee" => $request->consultancy_fee,
+                'user_id' => $request->user_id,
+                'hpcno' => $request->hpcno,
+                'consultancy_fee' => $request->consultancy_fee,
+                'experience' => $request->experience,
+                'availability' => $request->availability,
             ]);
+
             $doctorResource = new DoctorsResource($doctor);
-            return $this->success($doctorResource, "Doctor created successfully", 201);
+
+            return $this->success($doctorResource, 'Doctor created successfully', null, 201);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Exception $e) {
             $this->debugAppError($e);
-            $err_msg = $e->getMessage();;
-            return $this->error(null, $err_msg, 422);
+
+            return $this->error($e->getMessage(), 422);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Doctor $doctor)
+    public function show($id)
     {
         try {
             $this->ensureAuthenticated();
-            $doctor = DoctorsResource::make($doctor);
-            return $this->success($doctor, "Doctor's Information", 200);
+            $doctor = Doctor::findOrFail($id);
+            $doctorResource = DoctorsResource::make($doctor);
+
+            return $this->success($doctorResource, "Doctor's Information");
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (ModelNotFoundException $e) {
+            $this->debugAppError($e);
+
+            return $this->error('Doctor not found', 404);
         } catch (Exception $e) {
             $this->debugAppError($e);
-            $err_msg = $e->getMessage();;
-            return $this->error(null, $err_msg, 404);
+
+            return $this->error($e->getMessage(), 500);
         }
     }
 
@@ -81,27 +108,43 @@ class DoctorsController extends Controller
             $this->ensureOwnership($doctor);
             $doctor->update($request->all());
             $formatted_data = DoctorsResource::make($doctor);
-            return $this->success($formatted_data, "Doctor updated successfully", 200);
+
+            return $this->success($formatted_data, 'Doctor updated successfully');
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (ModelNotFoundException $e) {
+            $this->debugAppError($e);
+
+            return $this->error('Doctor not found', 404);
         } catch (Exception $e) {
             $this->debugAppError($e);
-            return $this->error(null, $e->getMessage(), $e->getCode() ?: 422);
+
+            return $this->error($e->getMessage(), 422);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Doctor $doctor)
+    public function destroy($id)
     {
         try {
             $this->ensureAuthenticated();
+            $doctor = Doctor::findOrFail($id);
             $this->ensureOwnership($doctor);
             $doctor->delete();
-            return $this->success(null, null, 204);
+
+            return $this->success(null, 'Doctor deleted successfully', null, 204);
+        } catch (HttpResponseException $e) {
+            throw $e;
+        } catch (ModelNotFoundException $e) {
+            $this->debugAppError($e);
+
+            return $this->error('Doctor not found', 404);
         } catch (Exception $e) {
             $this->debugAppError($e);
-            $err_msg = $e->getMessage();
-            return $this->error(null, $err_msg, $e->getCode() ?: 500);
+
+            return $this->error($e->getMessage(), 500);
         }
     }
 }

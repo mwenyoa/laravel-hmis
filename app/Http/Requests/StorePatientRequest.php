@@ -22,8 +22,11 @@ class StorePatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'home_address' => ['required','string'],
-            'diagnosis'=> ['required','string'],
+            'blood_type' => ['required', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-,unknown'],
+            'allergies' => ['nullable', 'array'],
+            'current_medications' => ['nullable', 'array'],
+            'emergency_contact' => ['required', 'string', 'min:10', 'max:20'],
+            'user_id' => ['required', 'string', 'exists:users,id'],
         ];
     }
 }
